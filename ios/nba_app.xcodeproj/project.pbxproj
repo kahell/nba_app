@@ -194,7 +194,6 @@
 				B936A3D75C73D1BEB63CEC99 /* Pods-nba_appTests.debug.xcconfig */,
 				26E7464FC8F43EC8BEC739F5 /* Pods-nba_appTests.release.xcconfig */,
 			);
-			name = Pods;
 			path = Pods;
 			sourceTree = "<group>";
 		};
@@ -305,7 +304,7 @@
 			};
 			buildConfigurationList = 83CBB9FA1A601CBA00E9B192 /* Build configuration list for PBXProject "nba_app" */;
 			compatibilityVersion = "Xcode 3.2";
-			developmentRegion = English;
+			developmentRegion = en;
 			hasScannedForEncodings = 0;
 			knownRegions = (
 				en,
