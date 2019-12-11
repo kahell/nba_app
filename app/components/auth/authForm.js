@@ -1,9 +1,23 @@
 import React, {Component} from 'react';
-import {StyleSheet, Text, View, ScrollView, ActivityIndicator} from 'react-native';
+import {StyleSheet, Text, View, Button, Platform} from 'react-native';
 
 import Input from '../utils/forms/input';
+import ValidationRules from '../utils/forms/validationRules';
+
+import { connect } from 'react-redux';
+import { signIn, signUp } from '../../store/actions/user_actions';
+import {bindActionCreators} from 'redux';
+
+import {setTokens} from '../../components/utils/misc';
 
 class AuthFormComponent extends Component{
+
+    constructor(props) {
+        super(props)
+    
+        this.changeFormType = this.changeFormType.bind(this);
+        this.submitUser = this.submitUser.bind(this);
+    }
 
     state = {
         type: 'Login',
@@ -49,6 +63,11 @@ class AuthFormComponent extends Component{
         formCopy[name].value=value;
 
         // Rules
+        let rules = formCopy[name].rules;
+        let valid = ValidationRules(value, rules, formCopy);
+
+        formCopy[name].valid = valid;
+
         this.setState({
             form: formCopy
         })
@@ -73,6 +92,67 @@ class AuthFormComponent extends Component{
         </View>
         : null
     )
+
+    changeFormType = () => {
+        const type = this.state.type;
+
+        this.setState({
+            type: type === 'Login' ? 'Register' : 'Login',
+            action: type === 'Login' ? 'Register' : 'Login',
+            actionMode: type === 'Login' ? 'I want to Login' : 'I want to Register',
+        });
+    }
+
+    manageAccess = () => {
+        if(!this.props.User.auth.uid){
+            this.setState({
+                hasErrors: true
+            })
+        }else{
+            setTokens(this.props.User.auth, () =>{
+                this.setState({
+                    hasErrors: false
+                })
+                this.props.goNext();
+            });
+        }
+    }
+
+    submitUser = () => {
+        let isFormValid = true;
+        let formToSubmit = {};
+        const formCopy = this.state.form;
+
+        for(let key in formCopy){
+            if(this.state.type === 'Login'){
+                // Login
+                if(key !== 'confirmPassword'){
+                    isFormValid = isFormValid && formCopy[key].valid;
+                    formToSubmit[key] = formCopy[key].value;
+                }
+            }else{
+                // Register
+                isFormValid = isFormValid && formCopy[key].valid;
+                formToSubmit[key] = formCopy[key].value;
+            }
+        }
+
+        if(isFormValid){
+            if(this.state.type === 'Login'){
+                this.props.signIn(formToSubmit).then(() => {
+                    this.manageAccess();
+                });
+            }else{
+                this.props.signUp(formToSubmit).then(() => {
+                    this.manageAccess();
+                });
+            }
+        }else{
+            this.setState({
+                hasErrors: true
+            })
+        }
+    }
   
     render(){
         return (
@@ -99,6 +179,27 @@ class AuthFormComponent extends Component{
 
                 {this.confirmPassword()}
                 {this.formHasErrors()}
+
+                <View style={{marginTop: 20}}>
+                    <View style={style.button}>
+                        <Button
+                            title={this.state.action}
+                            onPress={this.submitUser}
+                        />
+                    </View>
+                    <View style={style.actionMode}>
+                        <Button
+                            title={this.state.actionMode}
+                            onPress={this.changeFormType}
+                        />
+                    </View>
+                    <View style={style.actionMode}>
+                        <Button
+                            title="I'll do it later"
+                            onPress={() => this.props.goNext()}
+                        />
+                    </View>
+                </View>
 
             </View>
         )
@@ -127,6 +228,48 @@ const style = StyleSheet.create({
       color:'#fff',
       textAlign:'center',
       textAlignVertical:'center'
+  },
+  button:{
+      ...Platform.select({
+          ios:{
+              marginBottom:0,
+              borderRadius:10,
+              borderWidth: 1,
+              borderColor: '#008BFF'
+          },
+          android:{
+              marginBottom: 10,
+              marginTop: 10,
+              borderRadius:10,
+              borderWidth: 1,
+              borderColor: '#008BFF'
+          }
+      })    
+  },
+  actionMode:{
+    ...Platform.select({
+        ios:{
+            marginTop:10,
+            marginBottom:0,
+            borderRadius:10
+        },
+        android:{
+            marginBottom: 10,
+            marginTop: 10
+        }
+    })    
   }
 });
-export default AuthFormComponent;
+
+function mapStateToProps(state){
+    console.log(state);
+    return {
+        User: state.User
+    }
+}
+
+function mapDispatchToProps(dispatch){
+    return bindActionCreators({signIn, signUp}, dispatch);
+}
+
+export default connect(mapStateToProps, mapDispatchToProps)(AuthFormComponent);

@@ -453,4 +453,7 @@ DerivedData/
 ### Xcode Patch ###
 **/xcshareddata/WorkspaceSettings.xcsettings
 
+## Misc JS
+app/components/utils/misc.js
+
 # End of https://www.gitignore.io/api/osx,buck,node,linux,xcode,macos,kotlin,windows,android,intellij,fastlane,cocoapods,visualstudiocode

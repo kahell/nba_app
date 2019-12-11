@@ -4,10 +4,47 @@ import {StyleSheet, Text, View, ScrollView, ActivityIndicator} from 'react-nativ
 import LogoComponent from './authLogo';
 import AuthFormComponent from './authForm';
 
+import {getTokens, setTokens} from '../../components/utils/misc';
+
+import { connect } from 'react-redux';
+import { autoSignIn} from '../../store/actions/user_actions';
+import {bindActionCreators} from 'redux';
+
 class AuthComponent extends Component{
-  
-  state = {
-    loading: false
+
+  constructor(props) {
+    super(props)
+    this.state = {
+      loading: true
+    }
+
+    this.goNext = this.goNext.bind(this);
+  }
+
+  goNext = () => {
+    this.props.navigation.navigate('App');
+  }
+
+  componentDidMount(){
+    getTokens((value) => {
+      if(value[0][1] === null){
+        this.setState({
+          loading: false
+        })
+      }else{
+        this.props.autoSignIn(value[1][1]).then(() => {
+          if(!this.props.User.auth.token){
+            this.setState({
+              loading: false
+            });
+          }else{
+            setTokens(this.props.User.auth, () =>{
+              this.goNext();
+            })
+          }
+        });
+      }
+    });
   }
 
   render(){
@@ -21,7 +58,9 @@ class AuthComponent extends Component{
       return (
         <ScrollView style={style.container}>
           <LogoComponent/>
-          <AuthFormComponent/>
+          <AuthFormComponent
+            goNext={this.goNext}
+          />
         </ScrollView>
       )
     }
@@ -43,4 +82,14 @@ const style = StyleSheet.create({
   }
 })
 
-export default AuthComponent;
+function mapStateToProps(state){
+  return {
+      User: state.User
+  }
+}
+
+function mapDispatchToProps(dispatch){
+  return bindActionCreators({autoSignIn}, dispatch);
+}
+
+export default connect(mapStateToProps, mapDispatchToProps)(AuthComponent);
