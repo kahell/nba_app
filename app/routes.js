@@ -1,34 +1,39 @@
-import React from 'react';
-import {Platform} from 'react-native';
+import React, {Component} from 'react';
+import {View} from 'react-native';
 
 import {
     createAppContainer,
-    createSwitchNavigator,
+    createSwitchNavigator
 } from 'react-navigation';
 
 import {createBottomTabNavigator} from 'react-navigation-tabs';
 import {createStackNavigator} from 'react-navigation-stack';
 
-
 // Screens
-import SignIn from './components/auth';
-import News from './components/news';
-import Games from './components/games';
+import AuthComponent from './components/auth';
+import NewsComponent from './components/news';
+import GamesComponent from './components/games';
 
 const AppStack = createBottomTabNavigator({
-    News:News,
-    Games:Games
+    News:NewsComponent,
+    Games:GamesComponent
 });
 
 const AuthStack = createStackNavigator({
-    SignIn: SignIn
+    SignIn: AuthComponent
+},
+{
+    headerMode: 'none'
 });
 
-export const RootNavigator = () => {
-    return createAppContainer(createSwitchNavigator({
-        App:AppStack,
-        Auth:AuthStack
-    },{
-        initialRouteName:'App'
-    }))
-}
+const AppContainer = createAppContainer(createSwitchNavigator({
+    App:AppStack,
+    Auth:AuthStack
+},{
+    initialRouteName: 'Auth'
+}))
+export const RootNavigator = () => (
+    <View style={{flex:1}}>
+        <AppContainer/>
+    </View>
+);
