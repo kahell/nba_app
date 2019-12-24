@@ -1,6 +1,6 @@
 import AsyncStorage from '@react-native-community/async-storage';
 
-export const FIREBASEURL = ``;
+export const FIREBASEURL = '';
 export const APIKEY = ``;
 export const SIGNUP = `https://identitytoolkit.googleapis.com/v1/accounts:signUp?key=${APIKEY}`
 export const SIGNIN = `https://identitytoolkit.googleapis.com/v1/accounts:signInWithPassword?key=${APIKEY}`
@@ -30,4 +30,24 @@ export const setTokens = (values,cb) => {
     ]).then( response => {
         cb()
     });
+}
+
+export const convertFirebase = (data) => {
+    const newData = [];
+
+    for (key in data){
+        newData.push({
+            ...data[key],
+            id:key
+        });
+    }
+
+    return newData;
+}
+
+export const findTeamData = (itemId, teams) => {
+    const value = teams.find((team) => {
+        return team.id === itemId;
+    });
+    return value;
 }
